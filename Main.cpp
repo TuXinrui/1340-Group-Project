@@ -7,22 +7,15 @@
 #include <map>
 #include <algorithm>
 #include "attack.h"
+#include "support.h"
 using namespace std;
 
-int map_size;
-int elixir=0;  //cost
-int elixir_max=6;
-int turn=0;  //number of turns
-struct Ship {
-	int x1, y1, x2, y2;
-	int hp;
-};
-map<string,  Ship> playerships;  //to store player's ships
-map<string, Ship> enemyships;  //opponent's ships
+
 
 int main() {
 	//输入转换函数，获取用户的第一次输入
 	turn++;
+	
 	//Big turn for player and enemy
 	while (true) {
 		//player turn
@@ -35,4 +28,5 @@ int main() {
 		}
 		turn++;
 	}
+	
 }
