@@ -251,6 +251,7 @@ void attack_input_conversion(string target, string** ptr_real,string **ptr_seen,
 
 void skills(string target, string** ptr_real, string** ptr_seen, string command, int x1, int y1, int x2, int y2) {
 	if (target == "player") {
+		//把x1y1的船移动到x2y2
 		if (command == "move") {
 			string name = ptr_real[x1][y1];
 			int a = playerships[name].x2 - playerships[name].x1;
@@ -271,10 +272,33 @@ void skills(string target, string** ptr_real, string** ptr_seen, string command,
 			}
 			cout << "move finished\n";
 		}
+		//治疗点目标x1点
+		if (command == "heal") {
+			playerships[ptr_real[x1][y1]].hp += x2;
+			if (playerships[ptr_real[x1][y1]].hp > playerships[ptr_real[x1][y1]].hp_max) {
+				playerships[ptr_real[x1][y1]].hp = playerships[ptr_real[x1][y1]].hp_max;
+			}
+			cout << "heal successful" << endl;
+		}
+		//建造石油井1和2
+		if (command == "S" or command == "s") {
+			playerships[command].hp = 1;
+			playerships[command].hp_max = 1;
+			playerships[command].status = 1;
+			playerships[command].x1 = x1;
+			playerships[command].y1 = y1;
+			playerships[command].x2 = x1;
+			playerships[command].y2 = y1;
+			ptr_seen[x1][y1] = command;
+			ptr_real[x1][y1] = command;
+			elixir_increament[0]++;
+			elixir_max[0]++;
+		}
+		//增加各种上限
 	}
 	else {
-		
-		}if (command == "move") {
+		//把x1y1的船移动到x2y2
+		if (command == "move") {
 			string name = ptr_real[x1][y1];
 			int a = enemyships[name].x2 - enemyships[name].x1;
 			int b = enemyships[name].y2 - enemyships[name].y1;
@@ -293,5 +317,28 @@ void skills(string target, string** ptr_real, string** ptr_seen, string command,
 				}
 			}
 			cout << "move finished\n";
+		}
+		//治疗点目标x1点
+		if (command == "heal") {
+			enemyships[ptr_real[x1][y1]].hp += x2;
+			if (enemyships[ptr_real[x1][y1]].hp > enemyships[ptr_real[x1][y1]].hp_max) {
+				enemyships[ptr_real[x1][y1]].hp = enemyships[ptr_real[x1][y1]].hp_max;
+			}
+		}
+		//建造石油井1和2
+		if (command == "S" or command == "s") {
+			enemyships[command].hp = 1;
+			enemyships[command].hp_max = 1;
+			enemyships[command].status = 1;
+			enemyships[command].x1 = x1;
+			enemyships[command].y1 = y1;
+			enemyships[command].x2 = x1;
+			enemyships[command].y2 = y1;
+			ptr_seen[x1][y1] = command;
+			ptr_real[x1][y1] = command;
+			elixir_increament[1]++;
+			elixir_max[1]++;
+		}
+		//增加各种上限
 	}
 }
