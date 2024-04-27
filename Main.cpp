@@ -18,7 +18,7 @@ int main() {
 	string** player_seen;
 	string** enemy_real;
 	string** enemy_seen;
-	//it is a new game
+	//新游戏
 	while (true) {
 		string in_line;
 		getline(cin, in_line);
@@ -34,8 +34,8 @@ int main() {
 			}
 			break;
 		}
+		//读档
 		if (in_line == "load") {
-			//读档啊
 			cout << "Enter your loading file's name" << endl;
 			string loading_name;
 			cin >> loading_name;
@@ -113,12 +113,23 @@ int main() {
 	}
 	if (turn == 0) {
 		//地图初始化Alex
+
+		//怪物初始化
+		//"-"的格子记录
+		for (int i = 1; i <= map_size; i++) {
+			for (int j = 1; j <= map_size; j++) {
+				if (player_seen[i][j] == "-") {
+					empty_grids.push_back({i, j});
+				}
+			}
+		}
+		
 		turn++;
 	}
 	else {
 		//读档的情况
 	}
-	//Big turn for player and enemy
+	//玩家回合
 	while (true) {
 		inputtransform(player_real, player_seen, enemy_real, enemy_seen);
 		//enemy turn
@@ -128,4 +139,5 @@ int main() {
 			break;
 		}
 	}
+	
 }
