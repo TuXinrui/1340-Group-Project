@@ -18,6 +18,7 @@ using namespace std;
 int map_size=0;
 int attack_buff[2] = {0,0};  
 int elixir[2] = {0,0};  //cost
+int elixir_increament[2] = { 1,1 };
 int elixir_max[2] = {6,6};
 int turn = 0;  //number of turns
 int torpedo_max[2] = {2,2};
