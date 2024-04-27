@@ -1,43 +1,133 @@
 #include <bits/stdc++.h>
 
 using namespace std;
-int main(string **ptr){
+int main(string **player_map_seen){
 	string in_line; //read a line from the player
 	while(1){
 		
 		getline(cin,in_line);
 		
 		if(turn==0){//game has not started
-			if(in_line=="load"){ //the player wants to load another saving
-				
-			}
+			/*if(in_line=="load"){ //the player wants to load another saving
+				string file_name;//stores the name the user want to open;
+				while(1){
+					cout<<"please input the name of the file.\n"
+					cin>>file_name;
+					if(file_name=="cancel"){
+						break;//the player doesn't want to load a game
+					}
+					ifstream fin;
+					fin.open(file_name);
+					if(fin.fail()){//
+ 						cout << "Error in file opening!\n";
+ 					}
+ 					else{
+ 						fin>>map_size;
+ 						
+ 						//need to add other input lines here;
+ 						fin.close();
+ 						break;
+					}
+				}
+			}*/
 			else if(in_line=="new game"){//the player wants to start a new game from a file
+				map_size=0;
 				cout<<"please input an integer \"n\" which 10<=n<=15, where n is the legth of the size of the map\n";
 				while(cin>>map_size){
-					if(map_size<10||map_size>15){
+					if(map_size<15||map_size>20){
 						cout<<"Invalid size, please enter again.\n";
 						continue;
-					}
-					mapsize+=1;
+					}	
 					break;
 				}
 				break;
 			}
+			else{
+				cout<<"Invalid input！"
+			}
 		}
-		
 		else{
+			//the battle has started
 			if(in_line=="save"){	//the player wants to save the game to a file
-				
+				string file_name;//stores the name the user want to open;
+				while(1){
+					cout<<"please input the name of the file.\n"
+					cin>>file_name;
+					if(file_name=="cancel"){
+						break;//the player doesn't want to load a game
+					}
+					ofstream fout;
+					fout.open(file_name);
+					if(fout.fail()){//
+ 						cout << "Error in file opening!\n";
+ 					}
+ 					else{
+ 						fout<<map_size<<endl;//save the mapsize
+ 						for(int i=1;i<=map_size;i++){
+ 							for(int j=1;j<=map_size;j++){
+ 								fout<<player_map_seen[i][j]<<" ";
+							}
+							cout<<endl;	
+						}
+						for(int i=1;i<=map_size;i++){
+ 							for(int j=1;j<=map_size;j++){
+ 								fout<<player_map_real[i][j]<<" ";
+							}
+							cout<<endl;	
+						}
+						for(int i=1;i<=map_size;i++){
+ 							for(int j=1;j<=map_size;j++){
+ 								fout<<enemy_map_seen[i][j]<<" ";
+							}
+							cout<<endl;	
+						}
+						for(int i=1;i<=map_size;i++){
+ 							for(int j=1;j<=map_size;j++){
+ 								fout<<enemy_map_real[i][j]<<" ";
+							}
+							cout<<endl;	
+						}
+						fout<<attack_buff[0]<<" "<<attack_buff[1]<<endl;
+						fout<<elixir[0]<<" "<<elixir[1]<<endl;
+						fout<<elixir_max[0]<<" "<<elixir_max[1]<<endl;
+						fout<<turn<<endl;
+						fout<<torpedo_max[0]<<" "<<torpedo_max[1]<<endl;
+						fout<<torpedo_remain<<endl;
+						for(Ship& ships : playerships){
+							fout<<playerships[ships].x1<<" "<<playerships[ships].y1<<" ";
+							fout<<playerships[ships].x2<<" "<<playerships[ships].y2<<" ";
+							fout<<playerships[ships].hp<<" "<<playerships[ships].status<<endl;
+						}
+						for(Ship& ships : enemyships){
+							fout<<enemyships[ships].x1<<" "<<enemyships[ships].y1<<" ";
+							fout<<enemyships[ships].x2<<" "<<enemyships[ships].y2<<" ";
+							fout<<enemyships[ships].hp<<" "<<enemyships[ships].status<<endl;
+						}
+						for(int i=0;i<damaged_grids.size;i++){
+							cout<<damaged_grids[i].x<<" "<<damaged_grids[i].y<<endl;
+						}
+ 						//need to add other output lines here;
+ 						fout.close();
+ 						break;
+					}
+				}
 			}
 			
-			else if(in_line=="move"){
-				if(elixir>3){
-					string move_ship, move_dir, move_dis; //ship to move, direction of the, distance of the move
-					bool move_valid; //indicates whether the move instruction is valid, 1 for valid, 0 for invalid
+			else if(in_line=="move"){//the player want's to move a ship
+				if(elixir>3){//need 3 elixirs to move
+					string move_ship, move_dir, move_dis; 
+					//ship to move, direction of the move, distance of the move
+					bool move_valid;
+					 //indicates whether the move instruction is valid, 1 for valid, 0 for invalid
 					cout<<"please enter the target ship, the direction and the distance. i.e. H east 5\n";
 					while(1){
 						move_valid=1;
-						cin>>move_ship>>move_dir>>move_dis;
+						cin>>move_ship;
+						if(move_ship=="cancel"){
+							//the user want to cancel the move
+							break;
+						}
+						cin>>move_dir>>move_dis;
 						if(move_ship!="H"&&move_ship!="h"&&move_ship!="K"&&move_ship!="k"&&move_ship!="Q"&&move_ship!="q"){
 							//invalid ship
 							cout<<"Invalid ship.\n";
@@ -49,7 +139,130 @@ int main(string **ptr){
 							move_valid=0;
 						}
 						if(move_valid==1){
-							playerships.
+							//movement input is correct in terms of format
+							if(move_dir=="west"){
+							 	//move to the west
+							 	if(playerships[move_ship].x1-move_dis<=0){
+								//movement out of boundary
+							 		cout<<"You can't move a ship out of the map!\n";
+							 		move_valid=0;
+								}
+								bool ship_overlap=0;
+								for(int i=x1-move_dis;i<=x2-move_dis;i++){
+									for(int j=y1;j<=y2;j++){
+										if(player_map_seen[i][j]!="-"&&player_map_seen[i][j]!=move_ship){
+											move_valid=0;
+											ship_overlap=1;
+											//can't move to grids that have been attacked or grids of other installations or ships
+										}
+									}
+								}
+								if(ship_overlap==1){
+									cout<<"You can't move a ship to a grid of other installations or a grid that has been attacked!\n";
+								}
+							}
+							if(move_dir=="west"){
+							 	//move to the west
+							 	if(playerships[move_ship].x1-move_dis<=0){
+								//movement out of boundary
+							 		cout<<"You can't move a ship out of the map!\n";
+							 		move_valid=0;
+								}
+								bool ship_overlap=0;
+								for(int i=playerships[move_ship].x1-move_dis;i<=playerships[move_ship].x2-move_dis;i++){
+									for(int j=playerships[move_ship].y1;j<=playerships[move_ship].y2;j--){
+										if(player_map_seen[i][j]!="-"&&player_map_seen[i][j]!=move_ship){
+											move_valid=0;
+											ship_overlap=1;
+											//can't move to grids that have been attacked or grids of other installations or ships
+										}
+									}
+								}
+								if(ship_overlap==1){
+									cout<<"You can't move a ship to a grid of other installations or a grid that has been attacked!\n";
+								}
+								else{
+									skills("player",player_map_real,player_map_seen,"move",playerships[move_ship].x1,playerships[move_ship].y1,playerships[move_ship].x1-move_dis,playerships[move_ship].y1);
+								}
+							}
+							else if(move_dir=="east"){
+							 	//move to the east
+							 	if(playerships[move_ship].x2+move_dis>map_size){
+								//movement out of boundary
+							 		cout<<"You can't move a ship out of the map!\n";
+							 		move_valid=0;
+								}
+								bool ship_overlap=0;
+								for(int i=playerships[move_ship].x1+move_dis;i<=playerships[move_ship].x2+move_dis;i++){
+									for(int j=playerships[move_ship].y1;j<=playerships[move_ship].y2;j--){
+										if(player_map_seen[i][j]!="-"&&player_map_seen[i][j]!=move_ship){
+											move_valid=0;
+											ship_overlap=1;
+											//can't move to grids that have been attacked or grids of other installations or ships
+										}
+									}
+								}
+								if(ship_overlap==1){
+									cout<<"You can't move a ship to a grid of other installations or a grid that has been attacked!\n";
+								}
+								else{
+									skills("player",player_map_real,player_map_seen,"move",playerships[move_ship].x1,playerships[move_ship].y1,playerships[move_ship].x1+move_dis,playerships[move_ship].y1);
+								}
+							}
+							else if(move_dir=="north"){
+							 	//move to the north
+							 	if(playerships[move_ship].y1+move_dis>map_size){
+								//movement out of boundary
+							 		cout<<"You can't move a ship out of the map!\n";
+							 		move_valid=0;
+								}
+								bool ship_overlap=0;
+								for(int i=playerships[move_ship].x1;i<=playerships[move_ship].x2;i++){
+									for(int j=playerships[move_ship].y1+move_dis;j<=playerships[move_ship].y2+move_dis;j--){
+										if(player_map_seen[i][j]!="-"&&player_map_seen[i][j]!=move_ship){
+											move_valid=0;
+											ship_overlap=1;
+											//can't move to grids that have been attacked or grids of other installations or ships
+										}
+									}
+								}
+								if(ship_overlap==1){
+									cout<<"You can't move a ship to a grid of other installations or a grid that has been attacked!\n";
+								}
+								else{
+									//use skill function to renew the maps
+									skills("player",player_map_real,player_map_seen,"move",playerships[move_ship].x1,playerships[move_ship].y1,playerships[move_ship].x1,playerships[move_ship].y1+move_dis);
+								}
+							}
+							else if(move_dir=="south"){
+							 	//move to the south
+							 	if(playerships[move_ship].y2-move_dis<=0){
+								//movement out of boundary
+							 		cout<<"You can't move a ship out of the map!\n";
+							 		move_valid=0;
+								}
+								bool ship_overlap=0;
+								for(int i=playerships[move_ship].x1;i<=playerships[move_ship].x2;i++){
+									for(int j=playerships[move_ship].y1-move_dis;j<=playerships[move_ship].y2-move_dis;j--){
+										if(player_map_seen[i][j]!="-"&&player_map_seen[i][j]!=move_ship){
+											move_valid=0;
+											ship_overlap=1;
+											//can't move to grids that have been attacked or grids of other installations or ships
+										}
+									}
+								}
+								if(ship_overlap==1){
+									cout<<"You can't move a ship to a grid of other installations or a grid that has been attacked!\n";
+								}
+								else{
+									//use skill function to renew the maps
+									skills("player",player_map_real,player_map_seen,"move",playerships[move_ship].x1,playerships[move_ship].y1,playerships[move_ship].x1,playerships[move_ship].y1-move_dis);
+								}
+							}
+						}
+						if(move_valid==1){
+							//successfully moved, the loop should be broke
+							break;
 						}
 					}
 					
@@ -59,16 +272,16 @@ int main(string **ptr){
 				}
 			}
 			
-			else if(in_line=="load"){	//the player wants to load another saving
-				
-			}
-			else if(in_line=="new game"){	//the player wants to start a new game from a file
+			else if(in_line=="quit"){	
 				
 			}
 			else if(in_line=="shop"){	//the player wants to open the shop page
 				
 			}
 			else if(in_line=="surrender"){
+				
+			}
+			else if(in_line=="oil drill"){
 				
 			}
 			else if(in_line=="attack"){	
@@ -80,7 +293,11 @@ int main(string **ptr){
 				while(1){
 					cout<<"Please enter attack type and attack coordinates. (i.e. artillery 5 5)\n";
 					atk_valid=1;
-					cin>>atk_type>>tmp_x>>tmp_y;
+					cin>>atk_type;
+					if(atk_type=="cancel"){
+						break;
+					}
+					cin>>tmp_x>>tmp_y;
 					lenx=tmp_x.length();
 					leny=tmp_y.length();
 					
