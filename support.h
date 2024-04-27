@@ -7,6 +7,7 @@ extern int map_size;
 extern int attack_buff[2];
 extern int elixir[2];  //cost
 extern int elixir_max[2];
+extern int elixir_increament[2];
 extern int turn;  //number of turns
 extern int torpedo_max[2];
 extern int torpedo_remain;
