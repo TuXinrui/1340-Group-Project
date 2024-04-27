@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include "attack.h"
 #include "support.h"
+#include "enemy_ai.h"
 using namespace std;
 
 //把报废船或者建筑更新到地图上，此处指针都是seen
@@ -21,7 +22,9 @@ void broken_update(string target, string item, string** ptr_seen) {
 				ptr_seen[i][j] = "B";
 			}
 		}
+		enemy_container(ptr_seen);
 		playerships[item].status = 0;
+		
 	}
 	else {
 		for (int i = enemyships[item].x1; i <= enemyships[item].x2; i++) {
@@ -52,10 +55,13 @@ void broken_detect(string target, string item, string** ptr_seen) {
 //输入打击对象，打击对象的地图，点的位置，ptr_real是真实海域， ptr_seen是看到的
 void attack_detect(string target, string** ptr_real,string ** ptr_seen, int x, int y, int damage) {
 	//目标player
+	Cor temp = { x, y };
 	if (target == "player") {
 		//打空了
 		if (ptr_real[x][y] == "-") {
 			ptr_seen[x][y] = "O";
+			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
+			empty_grids.erase(itr);
 		}
 
 		//打到了航母1
@@ -63,60 +69,90 @@ void attack_detect(string target, string** ptr_real,string ** ptr_seen, int x, i
 			ptr_seen[x][y] = "X";
 			playerships["H"].hp -= damage;
 			broken_detect(target, "H", ptr_seen);
+			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
+			empty_grids.erase(itr);
+			hit_grids.push_back(temp);
 		}
 		//打到了航母2
 		else if (ptr_real[x][y] == "h") {
 			ptr_seen[x][y] = "X";
 			playerships["h"].hp -= damage;
 			broken_detect(target, "h", ptr_seen);
+			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
+			empty_grids.erase(itr);
+			hit_grids.push_back(temp);
 		}
 		//打到了驱逐1
 		else if (ptr_real[x][y] == "Q") {
 			ptr_seen[x][y] = "X";
 			playerships["Q"].hp -= damage;
 			broken_detect(target, "Q", ptr_seen);
+			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
+			empty_grids.erase(itr);
+			hit_grids.push_back(temp);
 		}
 		//打到了驱逐2
 		else if (ptr_real[x][y] == "q") {
 			ptr_seen[x][y] = "X";
 			playerships["q"].hp -= damage;
 			broken_detect(target, "X", ptr_seen);
+			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
+			empty_grids.erase(itr);
+			hit_grids.push_back(temp);
 		}
 		//打到了科技1
 		else if (ptr_real[x][y] == "K") {
 			ptr_seen[x][y] = "X";
 			playerships["K"].hp -= damage;
 			broken_detect(target, "K", ptr_seen);
+			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
+			empty_grids.erase(itr);
+			hit_grids.push_back(temp);
 		}
 		//打到了驱逐2
 		else if (ptr_real[x][y] == "k") {
 			ptr_seen[x][y] = "X";
 			playerships["k"].hp -= damage;
 			broken_detect(target, "k", ptr_seen);
+			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
+			empty_grids.erase(itr);
+			hit_grids.push_back(temp);
 		}
 		//打到了石油1
 		else if (ptr_real [x] [y] == "S") {
 			ptr_seen[x][y] = "X";
 			playerships["S"].hp -= damage;
 			broken_detect(target, "S", ptr_seen);
+			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
+			empty_grids.erase(itr);
+			hit_grids.push_back(temp);
 		}
 		//打到了石油2
 		else if (ptr_real[x][y] == "s") {
 			ptr_seen[x][y] = "X";
 			playerships["s"].hp -= damage;
 			broken_detect(target, "s", ptr_seen);
+			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
+			empty_grids.erase(itr);
+			hit_grids.push_back(temp);
 		}
 		//打到了护盾1
 		else if (ptr_real[x][y] == "D") {
 			ptr_seen[x][y] = "X";
 			playerships["D"].hp -= damage;
 			broken_detect(target, "D", ptr_seen);
+			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
+			empty_grids.erase(itr);
+			hit_grids.push_back(temp);
 		}
 		//打到了护盾2
 		else if (ptr_real[x][y] == "d") {
 			ptr_seen[x][y] = "X";
 			playerships["d"].hp -= damage;
 			broken_detect(target, "d", ptr_seen);
+			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
+			empty_grids.erase(itr);
+			hit_grids.push_back(temp);
 		}
 	}
 	
