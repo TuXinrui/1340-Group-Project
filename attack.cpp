@@ -352,7 +352,6 @@ void skills(string target, string** ptr_real, string** ptr_seen, string command,
 					ptr_real[i][j] = name;
 				}
 			}
-			cout << "move finished\n";
 		}
 		//治疗点目标x1点
 		if (command == "heal") {
