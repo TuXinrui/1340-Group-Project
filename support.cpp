@@ -27,6 +27,7 @@ int torpedo_remain=0;
 vector <Cor> damaged_grids;  //to store the attacked points in one turn
 vector<Cor> empty_grids;  //怪物ai可以攻击的容器
 vector<Cor> hit_grids;  //怪物ai打到的容器
+vector<Cor> forbid_grids;  //怪物ai一回合打到的容器
 map<string, Ship> playerships;  //to store player's ships
 map<string, Ship> enemyships;  //opponent's ships
 
