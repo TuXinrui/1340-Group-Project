@@ -26,4 +26,3 @@ extern vector<Cor> hit_grids;  //"X"
 extern vector<Cor> forbid_grids; //怪物一回合打到的点
 extern map<std::string, Ship> playerships;
 extern map<std::string, Ship> enemyships;
-

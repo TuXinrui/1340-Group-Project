@@ -14,6 +14,7 @@
 #include "enemy_ai.h"
 using namespace std;
 
+
 //把报废船或者建筑更新到地图上，此处指针都是seen
 void broken_update(string target, string item, string** ptr_seen) {
 	if (target == "player") {
@@ -51,111 +52,86 @@ void broken_detect(string target, string item, string** ptr_seen) {
 		}
 	}
 }
-
+void modify_empty(int x, int y) {
+	int b = 0;
+	for (int i = 0; i < empty_grids.size(); i++) {
+		if (empty_grids[i].x == x and empty_grids[i].y == y) {
+			b = i;
+			break;
+		}
+	}
+	empty_grids.erase(empty_grids.begin() + b);
+	hit_grids.push_back({x,y});
+}
 //输入打击对象，打击对象的地图，点的位置，ptr_real是真实海域， ptr_seen是看到的
 void attack_detect(string target, string** ptr_real,string ** ptr_seen, int x, int y, int damage) {
 	//目标player
+	
 	Cor temp = { x, y };
 	if (target == "player") {
 		//打空了
 		if (ptr_real[x][y] == "-") {
 			ptr_seen[x][y] = "O";
-			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
-			empty_grids.erase(itr);
+			modify_empty(x, y);
 		}
-
 		//打到了航母1
-		if (ptr_real[x][y] == "H") {
+		else if (ptr_real[x][y] == "H") {
 			ptr_seen[x][y] = "X";
 			playerships["H"].hp -= damage;
 			broken_detect(target, "H", ptr_seen);
-			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
-			empty_grids.erase(itr);
-			hit_grids.push_back(temp);
+			modify_empty(x, y);
 		}
 		//打到了航母2
+		
 		else if (ptr_real[x][y] == "h") {
 			ptr_seen[x][y] = "X";
 			playerships["h"].hp -= damage;
 			broken_detect(target, "h", ptr_seen);
-			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
-			empty_grids.erase(itr);
-			hit_grids.push_back(temp);
+			modify_empty(x, y);
 		}
 		//打到了驱逐1
 		else if (ptr_real[x][y] == "Q") {
 			ptr_seen[x][y] = "X";
 			playerships["Q"].hp -= damage;
 			broken_detect(target, "Q", ptr_seen);
-			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
-			empty_grids.erase(itr);
-			hit_grids.push_back(temp);
+			modify_empty(x, y);
 		}
 		//打到了驱逐2
 		else if (ptr_real[x][y] == "q") {
 			ptr_seen[x][y] = "X";
 			playerships["q"].hp -= damage;
 			broken_detect(target, "X", ptr_seen);
-			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
-			empty_grids.erase(itr);
-			hit_grids.push_back(temp);
+			modify_empty(x, y);
 		}
 		//打到了科技1
 		else if (ptr_real[x][y] == "K") {
 			ptr_seen[x][y] = "X";
 			playerships["K"].hp -= damage;
 			broken_detect(target, "K", ptr_seen);
-			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
-			empty_grids.erase(itr);
-			hit_grids.push_back(temp);
+			modify_empty(x, y);
 		}
 		//打到了驱逐2
 		else if (ptr_real[x][y] == "k") {
 			ptr_seen[x][y] = "X";
 			playerships["k"].hp -= damage;
 			broken_detect(target, "k", ptr_seen);
-			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
-			empty_grids.erase(itr);
-			hit_grids.push_back(temp);
+			modify_empty(x, y);
 		}
 		//打到了石油1
 		else if (ptr_real [x] [y] == "S") {
 			ptr_seen[x][y] = "X";
 			playerships["S"].hp -= damage;
 			broken_detect(target, "S", ptr_seen);
-			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
-			empty_grids.erase(itr);
-			hit_grids.push_back(temp);
+			modify_empty(x, y);
 		}
 		//打到了石油2
 		else if (ptr_real[x][y] == "s") {
 			ptr_seen[x][y] = "X";
 			playerships["s"].hp -= damage;
 			broken_detect(target, "s", ptr_seen);
-			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
-			empty_grids.erase(itr);
-			hit_grids.push_back(temp);
-		}
-		//打到了护盾1
-		else if (ptr_real[x][y] == "D") {
-			ptr_seen[x][y] = "X";
-			playerships["D"].hp -= damage;
-			broken_detect(target, "D", ptr_seen);
-			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
-			empty_grids.erase(itr);
-			hit_grids.push_back(temp);
-		}
-		//打到了护盾2
-		else if (ptr_real[x][y] == "d") {
-			ptr_seen[x][y] = "X";
-			playerships["d"].hp -= damage;
-			broken_detect(target, "d", ptr_seen);
-			vector<Cor>::iterator itr = find(empty_grids.begin(), empty_grids.end(), temp);
-			empty_grids.erase(itr);
-			hit_grids.push_back(temp);
+			modify_empty(x, y);
 		}
 	}
-	
 	//目标enemy
 	else if (target == "enemy") {
 		//打空了
@@ -163,7 +139,7 @@ void attack_detect(string target, string** ptr_real,string ** ptr_seen, int x, i
 			ptr_seen[x][y] = "O";
 		}
 		//打到了航母1
-		if (ptr_real[x][y] == "H") {
+		else if (ptr_real[x][y] == "H") {
 			ptr_seen[x][y] = "X";
 			enemyships["H"].hp -= damage;
 			broken_detect(target, "H", ptr_seen);
@@ -197,30 +173,6 @@ void attack_detect(string target, string** ptr_real,string ** ptr_seen, int x, i
 			ptr_seen[x][y] = "X";
 			enemyships["k"].hp -= damage;
 			broken_detect(target, "k", ptr_seen);
-		}
-		//打到了石油1
-		else if (ptr_real[x][y] == "S") {
-			ptr_seen[x][y] = "X";
-			enemyships["S"].hp -= damage;
-			broken_detect(target, "S", ptr_seen);
-		}
-		//打到了石油2
-		else if (ptr_real[x][y] == "s") {
-			ptr_seen[x][y] = "X";
-			enemyships["s"].hp -= damage;
-			broken_detect(target, "s", ptr_seen);
-		}
-		//打到了护盾1
-		else if (ptr_real[x][y] == "D") {
-			ptr_seen[x][y] = "X";
-			enemyships["D"].hp -= damage;
-			broken_detect(target, "D", ptr_seen);
-		}
-		//打到了护盾2
-		else if (ptr_real[x][y] == "d") {
-			ptr_seen[x][y] = "X";
-			enemyships["d"].hp -= damage;
-			broken_detect(target, "d", ptr_seen);
 		}
 	}
 }
@@ -256,9 +208,11 @@ void attack_input_conversion(string target, string** ptr_real,string **ptr_seen,
 	}//敌人回合
 	else {
 		//鱼雷
-		if (command == "torpedo")  attack_detect("enemy", ptr_real, ptr_seen, x, y, 1 + attack_buff[1]);
+		if (command == "torpedo") {
+			attack_detect("enemy", ptr_real, ptr_seen, x, y, 1 + attack_buff[1]);
+		}
 		//舰炮
-		if (command == "artillery") {
+		else if (command == "artillery") {
 			for (int i = x - 1; i <= x + 1; i++) {
 				for (int j = y - 1; j <= y + 1; j++) {
 					attack_detect("enemy", ptr_real, ptr_seen, i, j, 1 + attack_buff[1]);
@@ -266,7 +220,7 @@ void attack_input_conversion(string target, string** ptr_real,string **ptr_seen,
 			}
 		}
 		//导弹
-		if (command == "missile") {
+		else if (command == "missile") {
 			for (int i = x - 2; i <= x + 2; i++) {
 				for (int j = y - 2; j <= y + 2; j++) {
 					attack_detect("enemy", ptr_real, ptr_seen, i, j, 1 + attack_buff[1]);
@@ -274,7 +228,7 @@ void attack_input_conversion(string target, string** ptr_real,string **ptr_seen,
 			}
 		}
 		//核弹
-		if (command == "nuclear") {
+		else if (command == "nuclear") {
 			for (int i = x - 2; i <= x + 2; i++) {
 				for (int j = y - 2; j <= y + 2; j++) {
 					attack_detect("enemy", ptr_real , ptr_seen, i, j, 1 + attack_buff[1]);
@@ -288,6 +242,7 @@ void attack_input_conversion(string target, string** ptr_real,string **ptr_seen,
 void skills(string target, string** ptr_real, string** ptr_seen, string command, int x1, int y1, int x2, int y2) {
 	if (target == "player") {
 		//把x1y1的船移动到x2y2
+		
 		if (command == "move") {
 			string name = ptr_real[x1][y1];
 			int a = playerships[name].x2 - playerships[name].x1;
@@ -334,6 +289,7 @@ void skills(string target, string** ptr_real, string** ptr_seen, string command,
 	}
 	else {
 		//把x1y1的船移动到x2y2
+		
 		if (command == "move") {
 			string name = ptr_real[x1][y1];
 			int a = enemyships[name].x2 - enemyships[name].x1;
@@ -353,6 +309,7 @@ void skills(string target, string** ptr_real, string** ptr_seen, string command,
 				}
 			}
 		}
+		
 		//治疗点目标x1点
 		if (command == "heal") {
 			enemyships[ptr_real[x1][y1]].hp += x2;

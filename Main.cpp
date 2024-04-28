@@ -6,26 +6,55 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <windows.h>
 #include "attack.h"
 #include "support.h"
 #include "inputtransform.h"
+#include "enemy_ai.h"
+#include "alex.h"
 using namespace std;
 
+void player_turn() {
+	elixir_increament[0] = 1;
+	for (string i :{"S", "s"}) {
+		if (playerships[i].status == 1) {
+			elixir_increament[0]++;
+		}
+	}
+	elixir[0] += elixir_increament[0];
+	damaged_grids.clear();
+	torpedo_remain = torpedo_max[0];
+}
 
+void enemy_turn(string ** enemy_seen) {
+	if (turn <= 31) {
+		elixir_increament[1] = 1 + (turn / 8);
+	}
+	else {
+		elixir_increament[1] = 4;
+	}
+	elixir[0] += elixir_increament[0];
+	forbid_grids.clear();
+	torpedo_remain = torpedo_max[1];
+	enemy_container(enemy_seen);
+}
 
 int main() {
-	string** player_real;
-	string** player_seen;
-	string** enemy_real;
-	string** enemy_seen;
-	//新游戏
+	string** player_real=0;
+	string** player_seen=0;
+	string** enemy_real=0;
+	string** enemy_seen=0;
+	//第一次用户输入
 	while (true) {
 		string in_line;
+		cout << "game started, input your first command pls" << endl;
 		getline(cin, in_line);
-		if (in_line == "new game") {//the player wants to start a new game from a file
-			map_size = 0;
-			cout << "please input an integer \"n\" which 10<=n<=15, where n is the legth of the size of the map\n";
-			while (cin >> map_size) {
+		//新游戏
+		if (in_line == "new game") {
+			//map_size = 0;
+			cout << "please input an integer \"n\" which 15<=n<=20, where n is the legth of the size of the map\n";
+			cin >> map_size;
+			while (true) {
 				if (map_size < 15 || map_size>20) {
 					cout << "Invalid size, please enter again.\n";
 					continue;
@@ -35,7 +64,7 @@ int main() {
 			break;
 		}
 		//读档
-		if (in_line == "load") {
+		else if (in_line == "load") {
 			cout << "Enter your loading file's name" << endl;
 			string loading_name;
 			cin >> loading_name;
@@ -82,62 +111,57 @@ int main() {
 				fin >> torpedo_max[0];
 				fin >> torpedo_max[1];
 				fin >> torpedo_remain;
-				fin >> torpedo_remain;
-				for (int i = 0; i < 6; i++) {
-					for (string j : {"H", "h", "Q", "q", "K", "k","S", "s" }) {
-						fin >> playerships[j].x1;
-						fin >> playerships[j].y1;
-						fin >> playerships[j].x2;
-						fin >> playerships[j].y2;
-						fin >> playerships[j].hp;
-						fin >> playerships[j].hp_max;
-						fin >> playerships[j].status;
-					}
+				for (string j : {"H", "h", "Q", "q", "K", "k","S", "s" }) {
+					fin >> playerships[j].x1;
+					fin >> playerships[j].y1;
+					fin >> playerships[j].x2;
+					fin >> playerships[j].y2;
+					fin >> playerships[j].hp;
+					fin >> playerships[j].hp_max;
+					fin >> playerships[j].status;
 				}
-				for (int i = 0; i < 6; i++) {
-					for (string j : {"H", "h", "Q", "q", "K", "k", "S", "s"}) {
-						fin >> enemyships[j].x1;
-						fin >> enemyships[j].y1;
-						fin >> enemyships[j].x2;
-						fin >> enemyships[j].y2;
-						fin >> enemyships[j].hp;
-						fin >> enemyships[j].hp_max;
-						fin >> enemyships[j].status;
-					}
+				for (string j : {"H", "h", "Q", "q", "K", "k"}) {
+					fin >> enemyships[j].x1;
+					fin >> enemyships[j].y1;
+					fin >> enemyships[j].x2;
+					fin >> enemyships[j].y2;
+					fin >> enemyships[j].hp;
+					fin >> enemyships[j].hp_max;
+					fin >> enemyships[j].status;
+				}
+				for (int i = 0; i < empty_grids.size(); i++) {
+					fin >> empty_grids[i].x;
+					fin >> empty_grids[i].y;
+				}
+				for (int i = 0; i < hit_grids.size(); i++) {
+					fin >> hit_grids[i].x;
+					fin >> hit_grids[i].y;
 				}
 				fin.close();
 			}
 			break;
 		}
-		cout << "Invalid input, try again." << endl;
+		else {
+			cout << "Invalid input, try again." << endl;
+		}
 	}
 	if (turn == 0) {
-		//地图初始化Alex
-
-		//怪物初始化
-		//"-"的格子记录
-		for (int i = 1; i <= map_size; i++) {
-			for (int j = 1; j <= map_size; j++) {
-				if (player_seen[i][j] == "-") {
-					empty_grids.push_back({i, j});
-				}
-			}
-		}
-		
+		InitMap(player_real, player_seen, enemy_real, enemy_seen);
 		turn++;
 	}
-	else {
-		//读档的情况
-	}
-	//玩家回合
+	//游戏开始
+	system("pause");
 	while (true) {
+		//回合初始化
+		player_turn();
 		inputtransform(player_real, player_seen, enemy_real, enemy_seen);
 		//enemy turn
-		turn++;
+		enemy_execute(player_real, player_seen, enemy_real, enemy_seen);
 		if (turn == -1) {
 			cout << "game ends" << endl;
 			break;
 		}
+		turn++;
+		//回合初始化
 	}
-	
 }
