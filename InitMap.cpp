@@ -101,14 +101,20 @@ void InitMap(std::string** playerMap, std::string** playerSeaMap, std::string** 
     };
     for(auto& ship : enemyShips) {
         std::string shipName = std::get<0>(ship);
-        int shipHP = std::get<1>(ship);
+        int shipHP = std::get<1>(ship); 
         int shipHeight = std::get<2>(ship);
         int shipWidth = std::get<3>(ship);
-        
+
         while(true) {
-            int x = rand() % (map_size - shipHeight + 1);
-            int y = rand() % (map_size - shipWidth + 1);
+            int x, y;
             std::string direction = rand() % 2 == 0 ? "h" : "v";
+            if (direction == "h") {
+                x = rand() % map_size;
+                y = rand() % (map_size - shipWidth + 1);
+            } else {
+                x = rand() % (map_size - shipHeight + 1); 
+                y = rand() % map_size;
+            }
 
             // 检查船只是否与其他船只重叠
             bool isOverlap = false;
@@ -123,7 +129,7 @@ void InitMap(std::string** playerMap, std::string** playerSeaMap, std::string** 
                 for(int i = x; i < x + shipHeight; i++) {
                     if(enemyMap[i][y] != "-") {
                         isOverlap = true;
-                        break;
+                        break; 
                     }
                 }
             }
