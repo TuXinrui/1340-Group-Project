@@ -250,7 +250,6 @@ void attack_input_conversion(string target, string** ptr_real,string **ptr_seen,
 void skills(string target, string** ptr_real, string** ptr_seen, string command, int x1, int y1, int x2, int y2) {
 	if (target == "player") {
 		//把x1y1的船移动到x2y2
-		
 		if (command == "move") {
 			string name = ptr_real[x1][y1];
 			int a = playerships[name].x2 - playerships[name].x1;
@@ -258,15 +257,17 @@ void skills(string target, string** ptr_real, string** ptr_seen, string command,
 			for (int i = playerships[name].x1; i <= playerships[name].x2; i++) {
 				for (int j = playerships[name].y1; j <= playerships[name].y2; j++) {
 					ptr_real[i][j] = "-";
+					if (ptr_seen[i][j] == name)  ptr_seen[i][j] = "-";
 				}
 			}
 			playerships[name].x1 = x2;
 			playerships[name].y1 = y2;
 			playerships[name].x2 = x2 + a;
-			playerships[name].x2 = y2 + b;
+			playerships[name].y2 = y2 + b;
 			for (int i = playerships[name].x1; i <= playerships[name].x2; i++) {
 				for (int j = playerships[name].y1; j <= playerships[name].y2; j++) {
 					ptr_seen[i][j] = name;
+					ptr_real[i][j] = name;
 				}
 			}
 			cout << "move finished\n";
@@ -305,15 +306,17 @@ void skills(string target, string** ptr_real, string** ptr_seen, string command,
 			for (int i = enemyships[name].x1; i <= enemyships[name].x2; i++) {
 				for (int j = enemyships[name].y1; j <= enemyships[name].y2; j++) {
 					ptr_real[i][j] = "-";
+					
 				}
 			}
 			enemyships[name].x1 = x2;
 			enemyships[name].y1 = y2;
 			enemyships[name].x2 = x2 + a;
-			enemyships[name].x2 = y2 + b;
+			enemyships[name].y2 = y2 + b;
 			for (int i = enemyships[name].x1; i <= enemyships[name].x2; i++) {
 				for (int j = enemyships[name].y1; j <= enemyships[name].y2; j++) {
 					ptr_real[i][j] = name;
+					ptr_seen[i][j] = name;
 				}
 			}
 		}

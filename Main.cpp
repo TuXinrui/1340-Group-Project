@@ -88,10 +88,18 @@ int main() {
 			else {
 				cout << "Load successful";
 				fin >> map_size;
-				player_real = new string * [map_size];
-				player_seen = new string * [map_size];
-				enemy_real = new string * [map_size];
-				enemy_seen = new string * [map_size];
+				player_real = new string * [map_size+1];
+				player_seen = new string * [map_size+1];
+				enemy_real = new string * [map_size+1];
+				enemy_seen = new string * [map_size+1];
+				//1
+				for (int i = 0; i <= map_size; i++) {
+					player_real[i] = new string[map_size + 1];
+					player_seen[i] = new string[map_size + 1];
+					enemy_real[i] = new string[map_size + 1];
+					enemy_seen[i] = new string[map_size + 1];
+				}
+
 				for (int i = 1; i <= map_size; i++) {
 					for (int j = 1; j <= map_size; j++) {
 						fin >> player_real[i][j];
@@ -140,11 +148,14 @@ int main() {
 					fin >> enemyships[j].hp_max;
 					fin >> enemyships[j].status;
 				}
-				for (int i = 0; i < empty_grids.size(); i++) {
+				int a, b;
+				fin >> a;
+				for (int i = 0; i < a; i++) {
 					fin >> empty_grids[i].x;
 					fin >> empty_grids[i].y;
 				}
-				for (int i = 0; i < hit_grids.size(); i++) {
+				fin >> b;
+				for (int i = 0; i < b; i++) {
 					fin >> hit_grids[i].x;
 					fin >> hit_grids[i].y;
 				}
