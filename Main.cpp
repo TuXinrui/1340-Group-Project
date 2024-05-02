@@ -12,6 +12,7 @@
 #include "inputtransform.h"
 #include "enemy_ai.h"
 #include "alex.h"
+#include "output.h"
 using namespace std;
 
 void player_turn() {
@@ -22,21 +23,29 @@ void player_turn() {
 		}
 	}
 	elixir[0] += elixir_increament[0];
+	if (elixir[0] > elixir_max[0])  elixir[0] = elixir_max[0];
 	damaged_grids.clear();
 	torpedo_remain = torpedo_max[0];
 }
 
-void enemy_turn(string ** enemy_seen) {
+void enemy_turn(string ** player_seen) {
 	if (turn <= 31) {
 		elixir_increament[1] = 1 + (turn / 8);
 	}
 	else {
 		elixir_increament[1] = 4;
 	}
-	elixir[0] += elixir_increament[0];
+	if (turn <= 10) {
+		elixir_max[1] = 6 + (turn / 5);
+	}
+	else {
+		elixir_max[1] = 8;
+	}
+	if (elixir[1] > elixir_max[1])  elixir[1] = elixir_max[1];
+	elixir[1] += elixir_increament[1];
 	forbid_grids.clear();
 	torpedo_remain = torpedo_max[1];
-	enemy_container(enemy_seen);
+	enemy_container(player_seen);
 }
 
 int main() {
@@ -57,6 +66,8 @@ int main() {
 			while (true) {
 				if (map_size < 15 || map_size>20) {
 					cout << "Invalid size, please enter again.\n";
+					cout << "please input an integer \"n\" which 15<=n<=20, where n is the legth of the size of the map\n";
+					cin >> map_size;
 					continue;
 				}
 				break;
@@ -146,22 +157,40 @@ int main() {
 		}
 	}
 	if (turn == 0) {
+		system("cls");
 		InitMap(player_real, player_seen, enemy_real, enemy_seen);
 		turn++;
 	}
 	//游戏开始
-	system("pause");
+	//system("pause");
 	while (true) {
-		//回合初始化
+		//玩家回合初始化
 		player_turn();
 		inputtransform(player_real, player_seen, enemy_real, enemy_seen);
-		//enemy turn
-		enemy_execute(player_real, player_seen, enemy_real, enemy_seen);
+		if (enemyships["H"].status == 0 and enemyships["h"].status == 0) {
+			cout << "Player wins by destroying all enemy battleships" << endl;
+			cout << "In " <<turn << " turns." << endl;
+			return 1;
+		}
 		if (turn == -1) {
 			cout << "game ends" << endl;
 			break;
 		}
+		//敌人回合初始化
+		cout << "enemy turn started" << endl;
+		enemy_turn(player_seen);
+		enemy_execute(player_real, player_seen, enemy_real, enemy_seen);
+		cout << "enemy turn ended" << endl;
+		if (playerships["H"].status == 0 and playerships["h"].status == 0) {
+			cout << "enemy wins by destroying all enemy battleships" << endl;
+			cout << "In " << turn << " turns." << endl;
+			return 1;
+		}
 		turn++;
-		//回合初始化
+		if (turn == -1) {
+			cout << "game ends" << endl;
+			break;
+		}
+		
 	}
 }

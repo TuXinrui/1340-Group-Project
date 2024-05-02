@@ -61,7 +61,7 @@ void modify_empty(int x, int y) {
 		}
 	}
 	empty_grids.erase(empty_grids.begin() + b);
-	hit_grids.push_back({x,y});
+	forbid_grids.push_back({ x,y });
 }
 //输入打击对象，打击对象的地图，点的位置，ptr_real是真实海域， ptr_seen是看到的
 void attack_detect(string target, string** ptr_real,string ** ptr_seen, int x, int y, int damage) {
@@ -75,61 +75,69 @@ void attack_detect(string target, string** ptr_real,string ** ptr_seen, int x, i
 			modify_empty(x, y);
 		}
 		//打到了航母1
-		else if (ptr_real[x][y] == "H") {
+		else if (ptr_real[x][y] == "H" and playerships["H"].status==true) {
 			ptr_seen[x][y] = "X";
 			playerships["H"].hp -= damage;
 			broken_detect(target, "H", ptr_seen);
 			modify_empty(x, y);
+			hit_grids.push_back({ x,y });
 		}
 		//打到了航母2
 		
-		else if (ptr_real[x][y] == "h") {
+		else if (ptr_real[x][y] == "h" and playerships["h"].status == true) {
 			ptr_seen[x][y] = "X";
 			playerships["h"].hp -= damage;
 			broken_detect(target, "h", ptr_seen);
 			modify_empty(x, y);
+			hit_grids.push_back({ x,y });
 		}
 		//打到了驱逐1
-		else if (ptr_real[x][y] == "Q") {
+		else if (ptr_real[x][y] == "Q" and playerships["Q"].status == true) {
 			ptr_seen[x][y] = "X";
 			playerships["Q"].hp -= damage;
 			broken_detect(target, "Q", ptr_seen);
 			modify_empty(x, y);
+			hit_grids.push_back({ x,y });
 		}
 		//打到了驱逐2
-		else if (ptr_real[x][y] == "q") {
+		else if (ptr_real[x][y] == "q" and playerships["q"].status == true) {
 			ptr_seen[x][y] = "X";
 			playerships["q"].hp -= damage;
-			broken_detect(target, "X", ptr_seen);
+			broken_detect(target, "q", ptr_seen);
 			modify_empty(x, y);
+			hit_grids.push_back({ x,y });
 		}
 		//打到了科技1
-		else if (ptr_real[x][y] == "K") {
+		else if (ptr_real[x][y] == "K" and playerships["K"].status == true) {
 			ptr_seen[x][y] = "X";
 			playerships["K"].hp -= damage;
 			broken_detect(target, "K", ptr_seen);
 			modify_empty(x, y);
+			hit_grids.push_back({ x,y });
 		}
 		//打到了驱逐2
-		else if (ptr_real[x][y] == "k") {
+		else if (ptr_real[x][y] == "k" and playerships["k"].status == true) {
 			ptr_seen[x][y] = "X";
 			playerships["k"].hp -= damage;
 			broken_detect(target, "k", ptr_seen);
 			modify_empty(x, y);
+			hit_grids.push_back({ x,y });
 		}
 		//打到了石油1
-		else if (ptr_real [x] [y] == "S") {
+		else if (ptr_real [x] [y] == "S" and playerships["S"].status == true) {
 			ptr_seen[x][y] = "X";
 			playerships["S"].hp -= damage;
 			broken_detect(target, "S", ptr_seen);
 			modify_empty(x, y);
+			hit_grids.push_back({ x,y });
 		}
 		//打到了石油2
-		else if (ptr_real[x][y] == "s") {
+		else if (ptr_real[x][y] == "s" and playerships["s"].status == true) {
 			ptr_seen[x][y] = "X";
 			playerships["s"].hp -= damage;
 			broken_detect(target, "s", ptr_seen);
 			modify_empty(x, y);
+			hit_grids.push_back({ x,y });
 		}
 	}
 	//目标enemy
@@ -139,37 +147,37 @@ void attack_detect(string target, string** ptr_real,string ** ptr_seen, int x, i
 			ptr_seen[x][y] = "O";
 		}
 		//打到了航母1
-		else if (ptr_real[x][y] == "H") {
+		else if (ptr_real[x][y] == "H" and enemyships["H"].status == 1) {
 			ptr_seen[x][y] = "X";
 			enemyships["H"].hp -= damage;
 			broken_detect(target, "H", ptr_seen);
 		}
 		//打到了航母2
-		else if (ptr_real[x][y] == "h") {
+		else if (ptr_real[x][y] == "h" and enemyships["h"].status == 1) {
 			ptr_seen[x][y] = "X";
 			enemyships["h"].hp -= damage;
 			broken_detect(target, "h", ptr_seen);
 		}
 		//打到了驱逐1
-		else if (ptr_real[x][y] == "Q") {
+		else if (ptr_real[x][y] == "Q" and enemyships["Q"].status == 1) {
 			ptr_seen[x][y] = "X";
 			enemyships["Q"].hp -= damage;
 			broken_detect(target, "Q", ptr_seen);
 		}
 		//打到了驱逐2
-		else  if (ptr_real[x][y] == "q") {
+		else  if (ptr_real[x][y] == "q" and enemyships["q"].status == 1) {
 			ptr_seen[x][y] = "X";
 			enemyships["q"].hp -= damage;
 			broken_detect(target, "q", ptr_seen);
 		}
 		//打到了科技1
-		else if (ptr_real[x][y] == "K") {
+		else if (ptr_real[x][y] == "K" and enemyships["K"].status == 1) {
 			ptr_seen[x][y] = "X";
 			enemyships["K"].hp -= damage;
 			broken_detect(target, "K", ptr_seen);
 		}
 		//打到了驱逐2
-		else if (ptr_real[x][y] == "k") {
+		else if (ptr_real[x][y] == "k" and enemyships["k"].status == 1) {
 			ptr_seen[x][y] = "X";
 			enemyships["k"].hp -= damage;
 			broken_detect(target, "k", ptr_seen);
