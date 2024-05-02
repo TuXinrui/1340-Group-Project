@@ -9,7 +9,6 @@
 #include <map>
 #include <algorithm>
 #include <stdlib.h>
-#include <Windows.h>
 #include "attack.h"
 #include "support.h"
 #include "inputtransform.h"
@@ -54,27 +53,37 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 	int count = 0;
 	battle_page_output(player_map_seen, enemy_map_seen);
 	while (1) {
-		cout << "Please input your order.\n";
-		getline(cin, in_line);	//receive player input
-		if (in_line == "") {
-			cout << "Invalid order.\n";
-			continue;
-		}
+		cout << "Please input your command.\n";
+		getline(cin, in_line);	
+		//empty cases
 		in_line = string_execute(in_line);
-		if (in_line == "") {
-			cout << "Invalid order.\n";
-			continue;
+		while (in_line == "") {
+			getline(cin, in_line);
+			in_line = string_execute(in_line);
 		}
 		if (in_line == "save") {	//the player wants to save the game to a file
 			if (count > 0) {
+				cout << "You have to save at the beginning of the turn!\n";
 				continue;	//player can only save at the begining of the turn;
 			}
 			string file_name;	//stores the name the user want to open;
 			while (1) {
-				cout << "please input the name of the file.\n";
-					cin >> file_name;
-				if (file_name == "cancel" || file_name == "Cancel") {
+				cout << "Please input the name of the file. The file name should avoid the keywords of the game\n";
+				cin >> file_name;
+				//special cases
+				if (string_execute(file_name)=="cancel" ){
 					break;	//the player doesn't want to load a game
+				}
+				if (string_execute(file_name) == "endturn") {
+					return;
+				}
+				if (string_execute(file_name) == "quit") {
+					turn = -1;
+					return;
+				}
+				if (string_execute(file_name) == "surrender") {
+					turn = -2;
+					return;
 				}
 				ofstream fout;
 				fout.open(file_name);
@@ -109,36 +118,44 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 						}
 						cout << endl;
 					}
-					fout << attack_buff[0] << " " << attack_buff[1] << endl;	//save player buff and enemy buff
-					fout << elixir[0] << " " << elixir[1] << endl;	//save player elixir left and enemy elixir left
+					//fout << attack_buff[0] << " " << attack_buff[1] << endl;	//save player buff and enemy buff
+					fout << elixir[0]-elixir_increament[0] << " " << elixir[1] << endl;	//save player elixir left and enemy elixir left
 					fout << elixir_max[0] << " " << elixir_max[1] << endl;	//save player & enemy maximum elixir
 					fout << turn << endl;	//save the number of turns;
 					fout << torpedo_max[0] << " " << torpedo_max[1] << endl;	//save player & enemy maximum torpedo
 					fout << torpedo_remain << endl;	//save player torpedo remain
+					//save ship status
 					for (string i : {"H", "h", "K", "k", "Q", "q", "S", "s"}) {
 						fout << playerships[i].x1 << " " << playerships[i].y1 << " ";
 						fout << playerships[i].x2 << " " << playerships[i].y2 << " ";
-						fout << playerships[i].hp << " " << playerships[i].status << endl;
+						fout << playerships[i].hp << " " << playerships[i].hp_max << " " << playerships[i].status << endl;
 					}
 					for (string i : {"H", "h", "K", "k", "Q", "q"}) {
 						fout << enemyships[i].x1 << " " << enemyships[i].y1 << " ";
 						fout << enemyships[i].x2 << " " << enemyships[i].y2 << " ";
-						fout << enemyships[i].hp << " " << enemyships[i].status << endl;
+						fout << enemyships[i].hp << " " << enemyships[i].hp_max << " " << enemyships[i].status << endl;
 					}
+					//save data that is used by the enemy to determine actions to take
+					fout << empty_grids.size() << endl;
 					for (int i = 0; i < empty_grids.size(); i++) {
-						cout << empty_grids[i].x << " " << empty_grids[i].y << endl;
+						fout << empty_grids[i].x << " " << empty_grids[i].y << endl;
 					}
+					fout << hit_grids.size() << endl;
 					for (int i = 0; i < hit_grids.size(); i++) {
-						cout << hit_grids[i].x << " " << hit_grids[i].y << endl;
+						fout << hit_grids[i].x << " " << hit_grids[i].y << endl;
 					}
 					fout.close();
+					battle_page_output(player_map_seen, enemy_map_seen);
+					cout << "Saved successfully!\n";
+					string tmp_l;
+					getline(cin, tmp_l);
 					break;
 				}
 			}
 		}
 		else if (in_line == "move") {//the player want's to move a ship
 
-			if (elixir[0] >= 3) {//needs 3 elixirs to move
+			if (elixir[0] >= 4) {//needs 3 elixirs to move
 				string tmp_mov,move_ship,move_dir; //temporary stores move order, ship to move, direction of the move
 				int move_dis, tmp_mov_len,space_count;//distance of the move, length of move order
 				bool move_valid;//indicates whether the moveis valid, 1 for valid, 0 for invalid
@@ -153,22 +170,26 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 					getline(cin, tmp_mov);
 					//special cases
 					if (string_execute (tmp_mov) == "cancel") {
-						//the user want to cancel the move
+						//the user wants to cancel the move
 						break;
 					}
 					if (string_execute(tmp_mov) == "endturn") {
-						return;
+						return;//the user wants to end the move
 					}
 					if (string_execute(tmp_mov) == "quit") {
-						turn = -1;
+						turn = -1; //the user wants to quit the game
 						return;
 					}
 					if (string_execute(tmp_mov) == "surrender") {
-						turn = -2;
+						turn = -2;//the user wants to surrender
 						return;
+					}
+					if (string_execute(tmp_mov) == "move") {
+						continue;
 					}
 					tmp_mov_len = tmp_mov.length();
 					for (int i = 0; i < tmp_mov_len; i++) { //input format valid check
+						//ignore continuous spaces
 						if (i == 0 && tmp_mov[i] == ' ') {
 							while (1) {
 								if (tmp_mov[i + 1] == ' ') {
@@ -192,6 +213,7 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 								}
 							}
 						}
+						//move distance has to be a number
 						else if (space_count==2&&(tmp_mov[i] < 48 || tmp_mov[i] > 57)) {
 							cout << "Invalid input, please enter again.\n";
 							move_valid = 0;
@@ -199,14 +221,14 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 						}
 						else {
 							if (space_count == 0) {
-								move_ship.append(tmp_mov, i, 1);
+								move_ship.append(tmp_mov, i, 1);//store the ship of the move
 							}
 							else if (space_count == 1) {
-								move_dir.append(tmp_mov, i, 1);
+								move_dir.append(tmp_mov, i, 1);//store the direction of the move
 							}
 							else if (space_count == 2) {
 								move_dis*=10;
-								move_dis += (tmp_mov[i]-48);
+								move_dis += (tmp_mov[i]-48);//store the distance of the move
 							}
 							else {
 								cout << "Invalid input, please enter again\n";
@@ -215,13 +237,13 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 							}
 						}
 					}
-					//format correct, then check the content
+					
 					if (space_count < 2) {
-						cout << "Invalid input, please enter again\n";
+						cout << "Invalid input, please enter again\n";//insufficient input
 						move_valid = 0;
 						break;
 					}
-					
+					//format correct, then check the content
 					if (move_valid == 1) {
 						if (move_ship != "H" && move_ship != "h" && move_ship != "K" && move_ship != "k" && move_ship != "Q" && move_ship != "q") {
 							//invalid ship
@@ -235,7 +257,7 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 						}
 						if (move_dir != "west" && move_dir != "east" && move_dir != "north" && move_dir != "south") {
 							//invalid direction
-							cout << "invalid direction\.n";
+							cout << "invalid direction.\n";
 							move_valid = 0;
 						}
 						if (move_valid == 0) {
@@ -245,7 +267,7 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 						
 						move_dir = string_execute(move_dir);
 						if (move_dir == "south") {
-							//move to the west
+							//move to the south
 							if (playerships[move_ship].x1 - move_dis <= 0) {
 								//movement out of boundary
 								cout << "You can't move a ship out of the map!\n";
@@ -265,15 +287,15 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 							if (ship_overlap == 1) {
 								cout << "You can't move a ship to a grid of other installations or a grid that has been attacked!\n";
 							}
-							else {
+							else {//execute
 								skills("player", player_map_real, player_map_seen, "move", playerships[move_ship].x1, playerships[move_ship].y1, playerships[move_ship].x1 - move_dis, playerships[move_ship].y1);
 								count++;
-								elixir[0] -= 3;
+								elixir[0] -= 4;
 								battle_page_output(player_map_seen, enemy_map_seen);
 							}
 						}
 						else if (move_dir == "north") {
-							//move to the east
+							//move to the north
 							if (playerships[move_ship].x2 + move_dis > map_size) {
 								//movement out of boundary
 								cout << "You can't move a ship out of the map!\n";
@@ -293,15 +315,15 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 							if (ship_overlap == 1) {
 								cout << "You can't move a ship to a grid of other installations or a grid that has been attacked!\n";
 							}
-							else {
+							else {//execute
 								skills("player", player_map_real, player_map_seen, "move", playerships[move_ship].x1, playerships[move_ship].y1, playerships[move_ship].x1 + move_dis, playerships[move_ship].y1);
 								count++;
-								elixir[0] -= 3;
+								elixir[0] -= 4;
 								battle_page_output(player_map_seen, enemy_map_seen);
 							}
 						}
 						else if (move_dir == "east") {
-							//move to the north
+							//move to the east
 							if (playerships[move_ship].y1 + move_dis > map_size) {
 								//movement out of boundary
 								cout << "You can't move a ship out of the map!\n";
@@ -322,15 +344,15 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 								cout << "You can't move a ship to a grid of other installations or a grid that has been attacked!\n";
 							}
 							else {
-								//use skill function to renew the maps
+								//execute
 								skills("player", player_map_real, player_map_seen, "move", playerships[move_ship].x1, playerships[move_ship].y1, playerships[move_ship].x1, playerships[move_ship].y1 + move_dis);
 								count++;
-								elixir[0] -= 3;
+								elixir[0] -= 4;
 								battle_page_output(player_map_seen, enemy_map_seen);
 							}
 						}
 						else if (move_dir == "west") {
-							//move to the south
+							//move to the west
 							if (playerships[move_ship].y2 - move_dis <= 0) {
 								//movement out of boundary
 								cout << "You can't move a ship out of the map!\n";
@@ -351,22 +373,22 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 								cout << "You can't move a ship to a grid of other installations or a grid that has been attacked!\n";
 							}
 							else {
-								//use skill function to renew the maps
+								//execute
 								skills("player", player_map_real, player_map_seen, "move", playerships[move_ship].x1, playerships[move_ship].y1, playerships[move_ship].x1, playerships[move_ship].y1 - move_dis);
 								count++;
-								elixir[0] -= 3;
+								elixir[0] -= 4;
 								battle_page_output(player_map_seen, enemy_map_seen);
 							}
 						}
 					}
 					if (move_valid == 1) {
-						//successfully moved, the loop should be broke
+						//successfully moved, the loop should be broken
 						break;
 					}
 				}
 			}
 			else {
-				cout << "Insufficient elixir to move the ships, each move costs 3 elixirs.\n";
+				cout << "Insufficient elixir to move the ships, each move costs 4 elixir.\n";
 			}
 		}
 		else if (in_line == "quit") {
@@ -377,7 +399,7 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 			turn = -2;	//player lose
 			break;
 		}
-		else if (in_line == "elixirdrill") {
+		else if (in_line == "elixirdrill") {//place a elixir drill on the map
 			if (elixir[0] < 5) {
 				cout << "insufficient elixir, you need 5 elixir to build an elixir drill.\n";
 				continue;
@@ -386,10 +408,10 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 				cout << "You can't have more than 2 elixir drills at the same time!\n";
 				continue;
 			}
-			string tmp_cor;
+			string tmp_cor; //stores temporary coordinate input
 			
-			int d_x, d_y, tmp_len, space_count;
-			bool drill_valid;
+			int d_x, d_y, tmp_len, space_count; //drill coordinate x, y, length of input, number of "executed" spaces in the input
+			bool drill_valid;//1 for valid 0 for invalid
 			cout << "Please enter the coordinates of drill (y,x).\n";
 			while (1) {
 				getline(cin, tmp_cor);
@@ -415,6 +437,7 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 				}
 				//input format check
 				for (int i = 0; i < tmp_len;i++) {
+					//ignore the continuous spaces
 					if (i == 0 && tmp_cor[i] == ' ') {
 						while (1) {
 							if (tmp_cor[i + 1] == ' ') {
@@ -439,21 +462,21 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 						}
 					}
 					else if (tmp_cor[i] < 48 || tmp_cor[i] > 57) {
-						cout << "Invalid input, please enter again.\n";
+						cout << "Invalid input, please enter again.\n";//coordinates have to be numbers
 						drill_valid = 0;
 						break;
 					}
 					else {
 						if (space_count == 0) {
 							d_x *= 10;
-							d_x += (tmp_cor[i] - 48);
+							d_x += (tmp_cor[i] - 48);//stores the x coordinate
 						}
 						else if (space_count == 1) {
 							d_y *= 10;
-							d_y += (tmp_cor[i] - 48);
+							d_y += (tmp_cor[i] - 48);//stores the y coordinate
 						}
 						else {
-							cout << "Invalid input, please enter again.\n";
+							cout << "Invalid input, please enter again.\n";//too many input items
 							drill_valid = 0;
 							break;
 						}
@@ -463,7 +486,7 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 					continue;
 				}
 				if (space_count < 1) {
-					cout << "Invalid input, please enter again.\n";
+					cout << "Invalid input, please enter again.\n"; // insufficient input items
 					continue;
 				}
 				//format correct, then boundary check
@@ -475,14 +498,14 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 					cout << "You can only build the elixir drill at an empty grid that has not been damaged.\n";
 					continue;
 				}
-				else {
+				else {//execute
 					if (playerships["S"].status == 0) {
 						playerships["S"] = {d_x,d_y,d_x,d_y,1,1,1};
 						player_map_real[d_x][d_y] = "S";
 						player_map_seen[d_x][d_y] = "S";
 						elixir_max[0] += 1;
 						elixir_increament[0] += 1;
-						elixir[0] -= 3;
+						elixir[0] -= 5;
 						count++;
 						battle_page_output(player_map_seen,enemy_map_seen);
 					}
@@ -515,19 +538,23 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 				atk_x = 0;
 				atk_y = 0;
 				getline(cin, tmp_order);
+				//special cases
 				if (string_execute(tmp_order)=="cancel") {
 					break;	//the player wants to cancel the attack				
 				}
-				else if (string_execute(tmp_order) == "endturn") {
+				if (string_execute(tmp_order) == "endturn") {
 					return;
 				}
-				else if (string_execute(tmp_order) == "quit") {
+				if (string_execute(tmp_order) == "quit") {
 					turn = -1;
 					return;
 				}
-				else if (string_execute(tmp_order) == "surrender") {
+				if (string_execute(tmp_order) == "surrender") {
 					turn = -2;
 					return;
+				}
+				if (string_execute(tmp_order) == "attack") {
+					continue;
 				}
 				order_len = tmp_order.length();
 
@@ -555,31 +582,31 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 							}
 						}
 					}
-					else if (space_count >= 1 && (tmp_order[i] < 48 || tmp_order[i] > 57)) {
+					else if (space_count >= 1 && (tmp_order[i] < 48 || tmp_order[i] > 57)) {//coordinates have to be numbers
 						cout << "Invalid input, please enter again\n";
 						atk_valid = 0;
 						break;
 					}
 					else {
 						if (space_count == 0) {
-							atk_type.append(tmp_order, i, 1);
+							atk_type.append(tmp_order, i, 1);//stores the attack type
 						}
-						else if (space_count == 1) {
+						else if (space_count == 1) {//stores x-coordinates
 							atk_x *= 10;
 							atk_x += (tmp_order[i] - 48);
 						}
-						else if (space_count == 2) {
+						else if (space_count == 2) {//stores y-coordinates
 							atk_y *= 10;
 							atk_y += (tmp_order[i] - 48);
 						}
-						else {
+						else {//too many input items
 							cout << "Invalid input, please enter again\n";
 							atk_valid = 0;
 							break;
 						}
 					}
 				}
-				if (space_count < 2) {
+				if (space_count < 2) {//insufficient input items
 					cout << "Invalid input, please enter again\n";
 					atk_valid = 0;
 					break;
@@ -615,9 +642,10 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 							}
 						}
 					}
+					//boundary check:
 					if (atk_type == "torpedo" && atk_valid == 1) {
 						if (atk_x > 0 && atk_x <= map_size && atk_y>0 && atk_y <= map_size) {
-							if (torpedo_remain > 0) {	//topedo is free but the player can only use it for limited times in a turn
+							if (torpedo_remain > 0) {	//torpedo is free but the player can only use it for limited times in a turn
 								Cor tmp;
 								tmp = { atk_x,atk_y };
 								damaged_grids.push_back(tmp);	//new damaged grids
@@ -702,20 +730,23 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 				}
 			}
 		}
-		else if (in_line == "endturn") {
+		else if (in_line == "endturn") {//end the turn
 			return;
 		}
-		else if (in_line == "show") {
+		else if (in_line == "show") {//show the map that only shows the ships but does not show the attacked grids
 			battle_page_output(player_map_real, enemy_map_seen);
-			system("pause");
+			cout << "The clear map has been shown, enter any word to back to the battlepage.\n";
+			string tmp;
+			getline(cin, tmp);
+			system("clear");
 			battle_page_output(player_map_seen, enemy_map_seen);
 		}
-		else if (in_line == "heal") {
+		else if (in_line == "heal") {//spend 2 elixir to heal 3 hp for a ship
 			if (elixir[0] < 2) {
 				cout << "Insufficient elixir, it takes 2 elixir to heal";
 				continue;
 			}
-			string h_ship;	//ship top be healed;
+			string h_ship;	//ship to be healed;
 			while (1) {
 				cout << "please input the ship you want to heal (e.g. H).\n";
 				getline(cin, h_ship);
@@ -735,6 +766,9 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 					turn = -2;
 					return;
 				}
+				if (string_execute(h_ship) == "heal") {
+					continue;
+				}
 				//check if the ship is valid
 				if (h_ship != "H" && h_ship != "h" && h_ship != "Q" && h_ship != "q" && h_ship != "K" && h_ship != "k") {
 					cout << "Invalid ship.\n";
@@ -748,7 +782,7 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 					cout << "You can't heal a ship that has 100% hp.\n";
 					continue;
 				}
-				
+				//heal is valid, then execute
 				elixir[0] -= 2;
 				playerships[h_ship].hp += 3;
 				if (playerships[h_ship].hp > playerships[h_ship].hp_max) {//hp exceeds limit
@@ -760,9 +794,8 @@ void inputtransform(string** player_map_real, string** player_map_seen, string**
 				
 			}	
 		}
-		else {
+		else {//input does not match to any of the keywords
 			cout << "Invalid input, please enter again.\n";
 		}
 	}
-
 }
