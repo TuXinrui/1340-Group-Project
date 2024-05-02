@@ -2,14 +2,14 @@
 #include <string>
 using namespace std;
 
-//输入打击对象，打击对象的地图，点的位置
+//check the real map of the attacking grid, for enemy or for player
 void attack_detect(string target, string** ptr_real, string** ptr_seen, int x, int y, int damage);
-//把报废船或者建筑更新到地图上
+//update the broken ships onto the map
 void broken_update(string target, string item, string** ptr_seen);
-//检测目标玩家的船或者建筑是否报废
+//check whether the ship is broken
 void broken_detect(string target, string item, string** ptr_seen);
-//使用攻击类型
+//convert user input lines into commands
 void attack_input_conversion(string target, string** ptr_real, string** ptr_seen, string command, int x, int y, int damage);
-//特殊技能
+//for special skills
 void skills(string target, string** ptr_real, string** ptr_seen, string command, int x1, int y1, int x2, int y2);
 
